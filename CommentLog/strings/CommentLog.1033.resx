@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema id="root"
+                xmlns=""
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+        <xsd:element name="root"
+                     msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value"
+                                             type="xsd:string"
+                                             minOccurs="0" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name"
+                                           use="required"
+                                           type="xsd:string" />
+                            <xsd:attribute name="type"
+                                           type="xsd:string" />
+                            <xsd:attribute name="mimetype"
+                                           type="xsd:string" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias"
+                                           type="xsd:string" />
+                            <xsd:attribute name="name"
+                                           type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value"
+                                             type="xsd:string"
+                                             minOccurs="0"
+                                             msdata:Ordinal="1" />
+                                <xsd:element name="comment"
+                                             type="xsd:string"
+                                             minOccurs="0"
+                                             msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name"
+                                           type="xsd:string"
+                                           use="required"
+                                           msdata:Ordinal="1" />
+                            <xsd:attribute name="type"
+                                           type="xsd:string"
+                                           msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype"
+                                           type="xsd:string"
+                                           msdata:Ordinal="4" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value"
+                                             type="xsd:string"
+                                             minOccurs="0"
+                                             msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name"
+                                           type="xsd:string"
+                                           use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+  <data name="AuthorLookup_Desc" xml:space="preserve">
+    <value>Optional lookup column that stores the Comment's author - the preferred value for the author slot.</value>
+  </data>
+  <data name="AuthorLookup_Disp" xml:space="preserve">
+    <value>Comment Author (Lookup)</value>
+  </data>
+  <data name="AuthorText_Desc" xml:space="preserve">
+    <value>Optional text column to display the Comment's author where no lookup is available - the fallback value for the author slot.</value>
+  </data>
+  <data name="AuthorText_Disp" xml:space="preserve">
+    <value>Comment Author (Text)</value>
+  </data>
+  <data name="CommentBody_Desc" xml:space="preserve">
+    <value>Required column to use as the Comment's body text.</value>
+  </data>
+  <data name="CommentBody_Disp" xml:space="preserve">
+    <value>Comment Body</value>
+  </data>
+  <data name="CommentLog" xml:space="preserve">
+    <value>Comment Log</value>
+  </data>
+  <data name="CommentLog description" xml:space="preserve">
+    <value>A custom control to display and create Comments in a timeline-style list.</value>
+  </data>
+  <data name="CommentLog_Desc" xml:space="preserve">
+    <value>Connect this dataset to the Comments you wish to display.</value>
+  </data>
+  <data name="CommentLog_Disp" xml:space="preserve">
+    <value>Comment Log Dataset</value>
+  </data>
+  <data name="CommentTitle_Desc" xml:space="preserve">
+    <value>Optional text column to use as the Comment's title.</value>
+  </data>
+  <data name="CommentTitle_Disp" xml:space="preserve">
+    <value>Comment Title</value>
+  </data>
+  <data name="CommentType_Desc" xml:space="preserve">
+    <value>Optional choice column to categorise and colour-code Comments.</value>
+  </data>
+  <data name="CommentType_Disp" xml:space="preserve">
+    <value>Comment Type</value>
+  </data>
+  <data name="PageSize_Desc" xml:space="preserve">
+    <value>Number of records to load per page.</value>
+  </data>
+  <data name="PageSize_Disp" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
+  <data name="RelatedRecord_Desc" xml:space="preserve">
+    <value>Optional lookup column to store the host record reference when creating a new Comment.</value>
+  </data>
+  <data name="RelatedRecord_Disp" xml:space="preserve">
+    <value>Related Record</value>
+  </data>
+  <data name="TypeOnCreate_Desc" xml:space="preserve">
+    <value>Only use this parameter when 'Comment Type' is also in use! Set this value to a numeric choice value to auto-apply a designated Type on creation of a new Comment. Alternatively, leave this parameter blank to allow the user to select a Type of their choice.</value>
+  </data>
+  <data name="TypeOnCreate_Disp" xml:space="preserve">
+    <value>Apply Type on Create</value>
+  </data>
+  <data name="TypePlaceholder_Desc" xml:space="preserve">
+    <value>Text shown for items when 'Comment Type' is not available or not configured for use.</value>
+  </data>
+  <data name="TypePlaceholder_Disp" xml:space="preserve">
+    <value>Type Placeholder</value>
+  </data>
+  <data name="UnknownUserText_Desc" xml:space="preserve">
+    <value>Text shown when the Comment's author cannot be determined via Lookup or Text field in the dataset - the secondary fallback for the author slot.</value>
+  </data>
+  <data name="UnknownUserText_Disp" xml:space="preserve">
+    <value>Author Placeholder</value>
+  </data>
+  <data name="UploadDate_Desc" xml:space="preserve">
+    <value>Date or datetime column used for the Comment's upload date.</value>
+  </data>
+  <data name="UploadDate_Disp" xml:space="preserve">
+    <value>Date</value>
+  </data>
+</root>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="AV1917" constructor="CommentLog" version="0.0.36" display-name-key="CommentLog" description-key="CommentLog description" control-type="virtual">
+    <external-service-usage enabled="false" />
+
+    <!-- Allows for basic string types -->
+    <type-group name="TextTypes">
+      <type>SingleLine.Text</type>
+      <type>SingleLine.TextArea</type>
+    </type-group>
+    <!-- Allows for dateonly and datetime type selection -->
+    <type-group name="DateTypes">
+      <type>DateAndTime.DateAndTime</type>
+      <type>DateAndTime.DateOnly</type>
+    </type-group>
+
+    <data-set name="commentLog" display-name-key="CommentLog_Disp" description-key="CommentLog_Desc" cds-data-set-options="displayCommandBar:true;displayViewSelector:false;displayQuickFindSearch:true">
+      <property-set name="commentTitle" display-name-key="CommentTitle_Disp" description-key="CommentTitle_Desc" of-type-group="TextTypes" usage="bound" required="false"/>
+      <property-set name="commentBody" display-name-key="CommentBody_Disp" description-key="CommentBody_Desc" of-type="Multiple" usage="bound" required="true"/>
+      <property-set name="commentType" display-name-key="CommentType_Disp" description-key="CommentType_Desc" of-type="OptionSet" usage="bound" required="false"/>
+      <property-set name="authorLookup" display-name-key="AuthorLookup_Disp" description-key="AuthorLookup_Desc" of-type="Lookup.Simple" usage="bound" required="false"/>
+      <property-set name="authorText" display-name-key="AuthorText_Disp" description-key="AuthorText_Desc" of-type-group="TextTypes" usage="bound" required="false"/>
+      <property-set name="uploadDate" display-name-key="UploadDate_Disp" description-key="UploadDate_Desc" of-type-group="DateTypes" usage="bound" required="true"/>
+      <property-set name="relatedRecord" display-name-key="RelatedRecord_Disp" description-key="RelatedRecord_Desc" of-type="Lookup.Simple" usage="bound" required="false"/>
+    </data-set>
+    <property name="pageSize" display-name-key="PageSize_Disp" description-key="PageSize_Desc" of-type="Whole.None" usage="input" required="true" default-value="20"/>
+    <property name="typeOnCreate" display-name-key="TypeOnCreate_Disp" description-key="TypeOnCreate_Desc" of-type="SingleLine.Text" usage="input" required="false"/>
+    <property name="unknownUserText" display-name-key="UnknownUserText_Disp" description-key="UnknownUserText_Desc" of-type="SingleLine.Text" usage="input" required="false" default-value="Unknown User" />
+    <property name="typePlaceholder" display-name-key="TypePlaceholder_Disp" description-key="TypePlaceholder_Desc" of-type="SingleLine.Text" usage="input" required="false" default-value="Created" />
+    <property name="overrideInactive" display-name-key="Override Inactive?" description-key="Leave this PCF active and unlocked when the host record is inactive. Other security permissions still apply." of-type="TwoOptions" usage="input" required="false" default-value="false" />
+    <property name="lockIfNoParentWrite" display-name-key="Lock if No Parent Write?" description-key="Lock this PCF when the current user has no Write access to the host record. Other security permissions still apply." of-type="TwoOptions" usage="input" required="false" default-value="true" />
+
+    <resources>
+      <code path="index.ts" order="1"/>
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="9.46.2" />
+      <resx path="strings/CommentLog.1033.resx" version="1.0.0" />
+    </resources>
+    <feature-usage>
+        <uses-feature name="Utility" required="true" />
+        <uses-feature name="WebAPI" required="true" />
+    </feature-usage>
+  </control>
+</manifest>
