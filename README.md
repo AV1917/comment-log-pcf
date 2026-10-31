@@ -17,7 +17,7 @@ Migrating large volumes of comments from another system can present problems wit
 Comment Log accommodates this through a three-level author fallback: **mapped user lookup > plain text author > configurable placeholder**. Each comment displays the best available attribution, whether that's a proper Dataverse user, the original author's name, or a configurable placeholder such as *Unknown User*. New comments can then populate the same mapped columns with the current Dataverse user's details, without being restricted by the quality of the imported history.
 
 ![Demonstration of Fallback](https://github.com/user-attachments/assets/0f0e968b-a2f2-4b0a-bce3-e0ca55596f35)
-###### *Top down – Author Placeholder, Comment Author (Text), Comment Author (Lookup).*
+*Top down – Author Placeholder, Comment Author (Text), Comment Author (Lookup).*
 
 ### Independent comment records & bespoke permissions
 
@@ -36,7 +36,7 @@ Comment categorisation is optional, enabled by mapping the **Comment Type** para
 Comment types can also be used to drive additional behaviour through Dataverse plugins. For example, a PreValidation plugin registered on Create can use the assigned type to determine the record's owner, Business Unit, or other field values. This allows comments created through different instances of the Comment Log to follow different security or processing rules while sharing the same underlying table.
 
 ![Type on Create](https://github.com/user-attachments/assets/8a21dc55-2881-40d4-932a-b4520e03f014)
-###### *Two instances of Comment Log, each configured with a different **Apply Type on Create** value and a corresponding subgrid view filtered by that type.*
+*Two instances of Comment Log, each configured with a different **Apply Type on Create** value and a corresponding subgrid view filtered by that type.*
 
 ### Commenting on inactive records
 
@@ -135,7 +135,7 @@ By default, Comment Log requires parent Write access to use, mirroring default f
 </table>
 
 ![Full or Partial Setup](https://github.com/user-attachments/assets/32c08b13-3e32-488f-b8cb-2b200b93e9a7)
-###### *Full and minimal Comment Log configurations, showing optional column mappings.*
+*Full and minimal Comment Log configurations, showing optional column mappings.*
 
 ## Settings
 
