@@ -16,7 +16,7 @@ Migrating large volumes of comments from another system can present problems wit
 
 Comment Log accommodates this through a three-level author fallback: **mapped user lookup > plain text author > configurable placeholder**. Each comment displays the best available attribution, whether that's a proper Dataverse user, the original author's name, or a configurable placeholder such as *Unknown User*. New comments can then populate the same mapped columns with the current Dataverse user's details, without being restricted by the quality of the imported history.
 
-![Demonstration of Fallback](https://github.com/user-attachments/assets/0f0e968b-a2f2-4b0a-bce3-e0ca55596f35)
+![Demonstration of Fallback](https://github.com/user-attachments/assets/4bdb0dcd-690a-4b9a-8439-f4bb7400222a)
 *Top down – Author Placeholder, Comment Author (Text), Comment Author (Lookup).*
 
 ### Independent comment records & bespoke permissions
@@ -50,7 +50,20 @@ Users may need to add comments to records they can access but aren't permitted t
 
 By default, Comment Log requires parent Write access to use, mirroring default form permissions. Disabling **Lock if No Parent Write?** removes that requirement, allowing comment creation where the user has the necessary Create and Append privileges on the selected comments table, and Append To on the parent.
 
-## Column mappings
+## Install & configure
+
+1. Import a solution ZIP from the [latest release](https://github.com/AV1917/comment-log-pcf/releases) into your target environment.
+2. Open the parent table's main form and add a **Subgrid**.
+3. Enable **Show related records**, select the comments table through its parent relationship, and choose a view with the filters and sort order you want to use for the control.
+4. Under **Components > + Component**, select **Comment Log**. Use **Get more components** if it isn't listed.
+5. Configure the [column mappings](#column-mappings) and [settings](#settings) as shown below.
+6. Save and publish the form.
+
+In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
+
+![Example Configuration](https://github.com/user-attachments/assets/d4f84e25-a089-4118-80d9-5e4e5dbc35c0)
+
+### Column mappings
 
 <table>
   <thead>
@@ -134,10 +147,7 @@ By default, Comment Log requires parent Write access to use, mirroring default f
   </tbody>
 </table>
 
-![Full or Partial Setup](https://github.com/user-attachments/assets/32c08b13-3e32-488f-b8cb-2b200b93e9a7)
-*Full and minimal Comment Log configurations, showing optional column mappings.*
-
-## Settings
+### Settings
 
 | Setting | Default | Configuration and behaviour |
 | --- | --- | --- |
@@ -145,17 +155,6 @@ By default, Comment Log requires parent Write access to use, mirroring default f
 | **Apply Type on Create** | Blank | This feature requires a **Comment Type** mapping to use. Leave it blank for users to choose their own type, or enter an option's numeric value to assign it automatically and hide the type picker. |
 | **Override Inactive?** | No | Set to **Yes** to allow new comment creation after the parent record is closed or inactive. |
 | **Lock if No Parent Write?** | Yes | Set to **No** to allow new comment creation when users can access the parent record but cannot edit it. They will still need Create and Append on the comments table, and Append To on the parent. |
-
-## Install & configure
-
-1. Import a solution ZIP from the [latest release](https://github.com/AV1917/comment-log-pcf/releases) into your target environment.
-2. Open the parent table's main form and add a **Subgrid**.
-3. Enable **Show related records**, select the comments table through its parent relationship, and choose a view with the filters and sort order you want to use for the control.
-4. Under **Components > + Component**, select **Comment Log**. Use **Get more components** if it isn't listed.
-5. Configure the [column mappings](#column-mappings) and [settings](#settings).
-6. Save and publish the form.
-
-In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
 
 ## Usage notes
 
