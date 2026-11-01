@@ -17,7 +17,7 @@ Migrating large volumes of comments from another system can present problems wit
 Comment Log accommodates this through a three-level author fallback: **mapped user lookup > plain text author > configurable placeholder**. Each comment displays the best available attribution, whether that's a proper Dataverse user, the original author's name, or a configurable placeholder such as *Unknown User*. New comments can then populate the same mapped columns with the current Dataverse user's details, without being restricted by the quality of the imported history.
 
 ![Demonstration of Fallback](https://github.com/user-attachments/assets/4bdb0dcd-690a-4b9a-8439-f4bb7400222a)
-*Top down – Author Placeholder, Comment Author (Text), Comment Author (Lookup).*
+*Comments showing fallback options; from top down – Author Placeholder, Comment Author (Text), Comment Author (Lookup).*
 
 ### Independent comment records & bespoke permissions
 
@@ -155,6 +155,8 @@ In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
 | **Apply Type on Create** | Blank | This feature requires a **Comment Type** mapping to use. Leave it blank for users to choose their own type, or enter an option's numeric value to assign it automatically and hide the type picker. |
 | **Override Inactive?** | No | Set to **Yes** to allow new comment creation after the parent record is closed or inactive. |
 | **Lock if No Parent Write?** | Yes | Set to **No** to allow new comment creation when users can access the parent record but cannot edit it. They will still need Create and Append on the comments table, and Append To on the parent. |
+
+![Example Configuration II](https://github.com/user-attachments/assets/8349969b-a89f-4ead-ab61-fd5bc41cc335)
 
 ## Usage notes
 
