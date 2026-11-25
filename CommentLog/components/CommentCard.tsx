@@ -91,9 +91,9 @@ export const CommentCard: React.FC<ICommentCardProps> = ({
     if (!disabled) onToggleSelected(comment.id, data.checked === true);
   };
   const photoUrl = photo?.key === authorKey ? photo.url : undefined;
-  const pillStyle: React.CSSProperties = comment.typeColor
+  const pillStyle: React.CSSProperties | undefined = comment.typeColor
     ? { backgroundColor: comment.typeColor, color: getReadableTextColor(comment.typeColor) }
-    : { backgroundColor: '#f3f2f1', color: '#201f1e' };
+    : undefined;
 
   return (
     <Card className="comment-card" appearance="filled" role="listitem">
@@ -101,11 +101,11 @@ export const CommentCard: React.FC<ICommentCardProps> = ({
         <div className="comment-line">
           <Checkbox className="card-select-checkbox" checked={isSelected} onChange={onSelectedChange} aria-label="Select comment" disabled={disabled} />
           {comment.usesTypePlaceholder ? (
-            <span>{comment.typeLabel} by</span>
+            <span className="type-label" title={`${comment.typeLabel} by`}>{comment.typeLabel} by</span>
           ) : (
             <>
-              <span className="type-pill" style={pillStyle} title={comment.typeLabel}>
-                <span className="type-pill-text">{comment.typeLabel}</span>
+              <span className={pillStyle ? 'type-label type-pill' : 'type-label'} style={pillStyle} title={comment.typeLabel}>
+                {comment.typeLabel}
               </span>
               <span>by</span>
             </>
@@ -123,7 +123,7 @@ export const CommentCard: React.FC<ICommentCardProps> = ({
               <span className="uploader-name" title={comment.authorName}>{comment.authorName}</span>
             )}
           </span>
-          <span className="upload-date">@ {comment.dateText}</span>
+          <span className="upload-date" title={comment.dateText}>@ {comment.dateText}</span>
           <span className="spacer" />
           <button type="button" className="link-button open-button" aria-label="Open" onClick={onOpen} disabled={disabled}>
             <OpenIcon />

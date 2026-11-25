@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Theme } from '@fluentui/react-components';
 import type { IInputs, IOutputs } from './generated/ManifestTypes';
 import { CommentLogControl, type ICommentLogProps } from './components/CommentLogControl';
-import type { CommentRecord, CreateModel, FieldMapping, Notice, RecordReference, TypeOption } from './types/commentLogTypes';
+import type { CommentRecord, CreateModel, FieldMapping, Notice, RecordReference, TypeCatalogue, TypeOption, TypeValue } from './types/commentLogTypes';
 import { DataverseService } from './services/dataverse';
 import { DatasetOperationCancelled, DatasetState } from './services/datasetState';
 import { getFieldMapping, readComments, toViewModel } from './services/commentAdapter';
@@ -34,7 +34,8 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
   private readonly _host = new ModelDrivenHost();
   private _dataverse!: DataverseService;
   private readonly _pages = new DatasetState<CommentRecord>();
-  private readonly _choices = new Map<string, Resource<TypeOption[]>>();
+  private readonly _types = new Map<string, Resource<TypeCatalogue>>();
+  private readonly _historicalTypes = new Map<string, Resource<TypeOption | undefined>>();
   private readonly _access = new Map<string, Resource<Access>>();
   private readonly _privilegeMetadata = new Map<string, Promise<void>>();
   private _pageSize = 20;
@@ -94,6 +95,7 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
         firstPage: dataset.paging.firstPageNumber,
         lastPage: dataset.paging.lastPageNumber,
         error: dataset.error ? dataset.errorMessage || 'Comments could not be loaded.' : undefined,
+        dataUpdated: context.updatedProperties.includes('dataset'),
       });
       this._dataError = dataset.error ? dataset.errorMessage || 'Comments could not be loaded.' : undefined;
     } catch (error) {
@@ -106,26 +108,33 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
     }
     this.syncSelection(dataset, previousGeneration !== this._pages.generation);
 
-    const choiceState = entityName && fields.type
-      ? this.ensure(this._choices, `${entityName}|${fields.type}`, () => this._dataverse.getChoices(entityName, fields.type!))
-      : undefined;
-    const typeOptions = choiceState?.status === 'ready' ? choiceState.value : [];
+    const typeState = this.loadTypes(context, entityName, fields.type);
+    const catalogue = typeState?.status === 'ready' ? typeState.value : undefined;
+    const typeOptions = catalogue?.options ?? [];
     const optionMap = new Map(typeOptions.map(option => [option.value, option]));
     const accessState = entityName && parent
       ? this.ensure(this._access, this.accessKey(entityName, parent), () => this.loadAccess(context, entityName, parent))
       : undefined;
     const access = accessState?.status === 'ready' ? accessState.value : undefined;
 
-    const fixedTypeCandidate = optionValue(context.parameters.typeOnCreate.raw);
-    const fixedType = fixedTypeCandidate !== undefined &&
-      (typeOptions.length === 0 || optionMap.has(fixedTypeCandidate)) ? fixedTypeCandidate : undefined;
-    const showTypePickerOnCreate = fields.type !== undefined && fixedType === undefined;
-    const pickerTypeOptions = showTypePickerOnCreate && choiceState?.status === 'ready'
-      ? pickerOptions(typeOptions)
-      : [];
+    const fixedConfigured = fields.type !== undefined && !!nonEmptyString(context.parameters.typeOnCreate.raw);
+    let fixedType: TypeValue | undefined;
+    let fixedTypeError: string | undefined;
+    if (catalogue) {
+      try {
+        fixedType = this.fixedType(context, catalogue);
+      } catch (error) {
+        fixedTypeError = errorMessage(error);
+      }
+    }
+    const showTypePickerOnCreate = fields.type !== undefined && !fixedConfigured;
+    const pickerTypeOptions = showTypePickerOnCreate ? pickerOptions(typeOptions) : [];
+    const historicalError = Array.from(this._historicalTypes.values()).find(state => state.status === 'error');
     const issues = [
       this._dataError,
-      choiceState?.status === 'error' ? `Could not load comment type metadata: ${choiceState.message}` : undefined,
+      typeState?.status === 'error' ? `Could not load comment types: ${typeState.message}` : undefined,
+      historicalError?.status === 'error' ? `Could not load historical comment types: ${historicalError.message}` : undefined,
+      fixedTypeError,
       accessState?.status === 'error' ? `Could not check permissions: ${accessState.message}` : undefined,
     ].filter((issue): issue is string => issue !== undefined).map<Notice>(message => ({
       level: 'error', message, action: { label: 'Retry', onClick: () => this.retry() },
@@ -144,10 +153,10 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
       canRead: access?.canRead ?? true,
       canCreate: access?.canCreate === true && !!fields.body && !!fields.uploadDate,
       usesTitleColumn: fields.title !== undefined,
-      usesTypeChoiceColumn: fields.type !== undefined,
-      typeOptions,
+      usesTypeColumn: fields.type !== undefined,
+      isTypeReady: !fields.type || (catalogue !== undefined && !fixedTypeError),
       pickerTypeOptions,
-      isTypePickerLoading: showTypePickerOnCreate && choiceState?.status === 'loading',
+      isTypePickerLoading: showTypePickerOnCreate && typeState?.status === 'loading',
       typeOnCreateValue: fixedType,
       showTypePickerOnCreate,
       selectedIds: this._selectedIds,
@@ -182,6 +191,68 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
       this.runOperation(() => dataset.refresh());
     }
     return React.createElement(CommentLogControl, props);
+  }
+
+  private loadTypes(
+    context: ComponentFramework.Context<IInputs>, entityName: string, attribute?: string,
+  ): Resource<TypeCatalogue> | undefined {
+    if (!entityName || !attribute) {
+      this._types.clear();
+      this._historicalTypes.clear();
+      return undefined;
+    }
+    const view = nonEmptyString(context.parameters.typeView.raw)?.trim();
+    const colour = nonEmptyString(context.parameters.typeColour.raw)?.trim();
+    const includePicker = !nonEmptyString(context.parameters.typeOnCreate.raw);
+    const ids = Array.from(new Set(this._pages.records.map(record => record.typeValue)
+      .filter((value): value is string => typeof value === 'string'))).sort();
+    const key = JSON.stringify([entityName, attribute, view, colour, includePicker, this._pages.generation]);
+    if (!this._types.has(key)) {
+      this._types.clear();
+      this._historicalTypes.clear();
+      this._dataverse.clearTypeMetadata();
+      for (const id of ids) this._historicalTypes.set(id, { status: 'ready', value: undefined });
+    }
+    const state = this.ensure(this._types, key, () => this._dataverse.getTypes(entityName, attribute, view, colour, ids, includePicker));
+    if (state.status !== 'ready' || !state.value.lookupTarget) return state;
+    const known = new Set(state.value.options.map(option => option.value));
+    const missing = ids.filter(id => !known.has(id) && !this._historicalTypes.has(id));
+    if (missing.length) {
+      this.loadHistoricalTypes(key, state, missing,
+        () => this._dataverse.getTypes(entityName, attribute, undefined, colour, missing, false));
+    }
+    const historical = Array.from(this._historicalTypes.values()).flatMap(result =>
+      result.status === 'ready' && result.value ? [result.value] : []);
+    return { status: 'ready', value: { ...state.value, options: [...state.value.options, ...historical] } };
+  }
+
+  private loadHistoricalTypes(
+    key: string, catalogue: Resource<TypeCatalogue>, ids: string[], load: () => Promise<TypeCatalogue>,
+  ): void {
+    const pending: Resource<TypeOption | undefined> = { status: 'loading' };
+    for (const id of ids) this._historicalTypes.set(id, pending);
+    void Promise.resolve().then(load).then(result => {
+      if (this._destroyed || this._types.get(key) !== catalogue) return undefined;
+      const options = new Map(result.options.map(option => [option.value, option]));
+      for (const id of ids) this._historicalTypes.set(id, { status: 'ready', value: options.get(id) });
+      this.requestRender();
+      return undefined;
+    }).catch((error: unknown) => {
+      if (this._destroyed || this._types.get(key) !== catalogue) return;
+      const failed: Resource<TypeOption | undefined> = { status: 'error', message: errorMessage(error) };
+      for (const id of ids) this._historicalTypes.set(id, failed);
+      this.requestRender();
+    });
+  }
+
+  private fixedType(context: ComponentFramework.Context<IInputs>, catalogue: TypeCatalogue): TypeValue | undefined {
+    const raw = nonEmptyString(context.parameters.typeOnCreate.raw);
+    if (!raw) return undefined;
+    const value = catalogue.lookupTarget ? normaliseGuid(raw) : optionValue(raw);
+    if (value === undefined || (!catalogue.lookupTarget && !catalogue.options.some(option => option.value === value))) {
+      throw new Error('Apply Type on Create does not identify an available comment type. Check the control configuration.');
+    }
+    return value;
   }
 
   private ensure<T>(cache: Map<string, Resource<T>>, key: string, load: () => Promise<T>): Resource<T> {
@@ -351,24 +422,26 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
     };
     data[fields.uploadDate] = new Date().toISOString();
     if (fields.title) data[fields.title] = model.title!.trim();
+    const bindings: Promise<Record<string, string>>[] = [];
     if (fields.type) {
-      const fixedCandidate = optionValue(context.parameters.typeOnCreate.raw);
-      const choices = this._choices.get(`${entityName}|${fields.type}`);
-      const options = choices?.status === 'ready' ? choices.value : [];
-      const fixed = fixedCandidate !== undefined &&
-        (options.length === 0 || options.some(option => option.value === fixedCandidate))
-        ? fixedCandidate : undefined;
+      const state = this.loadTypes(context, entityName, fields.type);
+      if (state?.status !== 'ready') throw new Error('Comment types are unavailable. Refresh the list and try again.');
+      const catalogue = state.value;
+      const fixed = this.fixedType(context, catalogue);
       const type = fixed ?? model.typeValue;
-      if (type !== undefined) {
-        if (!Number.isInteger(type) ||
-          (options.length > 0 && !options.some(option => option.value === type))) {
-          throw new Error('The selected comment type is unavailable. Select another type and try again.');
-        }
+      if (type === undefined || (fixed === undefined && !catalogue.options.some(option => option.selectable && option.value === type))) {
+        throw new Error('The selected comment type is unavailable. Select another type and try again.');
+      }
+      if (catalogue.lookupTarget) {
+        bindings.push(this._dataverse.getLookupBinding(entityName, fields.type, {
+          id: requireGuid(type, 'Comment type'), entityName: catalogue.lookupTarget,
+        }));
+      } else {
+        if (typeof type !== 'number') throw new Error('The selected comment type is not a Choice value.');
         data[fields.type] = type;
       }
     }
     if (fields.authorText) data[fields.authorText] = context.userSettings.userName;
-    const bindings: Promise<Record<string, string>>[] = [];
     if (fields.authorLookup) {
       bindings.push(this._dataverse.getLookupBinding(entityName, fields.authorLookup, {
         id: requireGuid(context.userSettings.userId, 'Current user'), entityName: 'systemuser',
@@ -410,7 +483,8 @@ export class CommentLog implements ComponentFramework.ReactControl<IInputs, IOut
 
   private retry(): void {
     if (this._destroyed) return;
-    this._choices.forEach((state, key) => { if (state.status === 'error') this._choices.delete(key); });
+    this._types.clear();
+    this._historicalTypes.clear();
     this._access.forEach((state, key) => { if (state.status === 'error') this._access.delete(key); });
     if (this._dataError) this.runOperation(() => this._context.parameters.commentLog.refresh());
     this.requestRender();

@@ -19,6 +19,8 @@ export const requireGuid = (value: unknown, description: string): string => {
   return id;
 };
 
+export const defaultTypeColour = '#f3f2f1';
+
 export const normaliseColour = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
   const hex = value.trim().replace(/^#/, '');

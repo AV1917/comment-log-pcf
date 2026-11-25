@@ -1,4 +1,4 @@
-import type { CommentRecord, CommentViewModel, FieldMapping, RecordReference, TypeOption } from '../types/commentLogTypes';
+import type { CommentRecord, CommentViewModel, FieldMapping, RecordReference, TypeOption, TypeValue } from '../types/commentLogTypes';
 import { isRecord, nonEmptyString, normaliseGuid, optionValue, requireGuid } from '../utils/values';
 
 type DataSet = ComponentFramework.PropertyTypes.DataSet;
@@ -37,12 +37,14 @@ export const readComments = (dataset: DataSet, fields: FieldMapping): CommentRec
   dataset.sortedRecordIds.map(key => {
     const record = dataset.records[key];
     if (!record) throw new Error('A comment record is missing from the dataset. Refresh the list and try again.');
+    const rawType: unknown = fields.type ? record.getValue('commentType') : undefined;
+    const lookupType = readLookup(rawType);
     return {
       id: requireGuid(record.getRecordId(), 'Comment'),
       title: fields.title ? textValue(record, 'commentTitle') : undefined,
       body: textValue(record, 'commentBody') ?? '',
-      typeValue: fields.type ? optionValue(record.getValue('commentType')) : undefined,
-      typeLabel: fields.type ? nonEmptyString(record.getFormattedValue('commentType')) : undefined,
+      typeValue: lookupType?.id ?? optionValue(rawType),
+      typeLabel: lookupType?.name ?? (fields.type ? nonEmptyString(record.getFormattedValue('commentType')) : undefined),
       author: fields.authorLookup ? readLookup(record.getValue('authorLookup')) : undefined,
       authorText: fields.authorText ? textValue(record, 'authorText') : undefined,
       dateText: nonEmptyString(record.getFormattedValue('uploadDate')),
@@ -52,7 +54,7 @@ export const readComments = (dataset: DataSet, fields: FieldMapping): CommentRec
 
 export const toViewModel = (
   record: CommentRecord,
-  options: ReadonlyMap<number, TypeOption>,
+  options: ReadonlyMap<TypeValue, TypeOption>,
   unknownUserText: string,
   typePlaceholder: string,
 ): CommentViewModel => {

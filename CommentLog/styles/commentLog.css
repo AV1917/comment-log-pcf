@@ -135,23 +135,21 @@
   text-decoration: underline;
 }
 
-/* Type pill (dataset entries) */
-.type-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 12px;
-  padding: 2px 8px;
-  font-size: 14px;
-  line-height: 18px;
-  max-width: 100%;
+/* Type label (dataset entries) */
+.type-label {
+  min-width: 0;
+  max-width: 45%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.type-pill-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.type-pill {
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 14px;
+  line-height: 18px;
+  box-sizing: border-box;
 }
 
 /* Lookup chip*/
@@ -261,27 +259,52 @@
 }
 
 /* Type dropdown option spacing */
-.type-create-dropdown [role="option"] {
+.comment-container .type-create-dropdown {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.type-create-dropdown .fui-Dropdown__button {
+  min-width: 0;
+}
+
+.type-selected-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-options-listbox {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.type-options-listbox [role="option"] {
+  min-width: 0;
   padding-left: 8px !important;
   padding-right: 8px !important;
 }
 
 .type-option-row {
   display: flex;
+  flex: 1;
+  min-width: 0;
   align-items: center;
   gap: 8px;
 }
 
 .type-option-swatch {
+  flex: 0 0 10px;
   width: 10px;
   height: 10px;
   border-radius: 999px;
 }
 
 .type-option-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Align checkbox spacing */

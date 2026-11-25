@@ -4,8 +4,8 @@ import {
   type CheckboxOnChangeData, type Theme,
 } from '@fluentui/react-components';
 import { CommentCard } from './CommentCard';
-import type { CommentViewModel, CreateModel, RecordReference, TypeOption } from '../types/commentLogTypes';
-import { nonEmptyString, optionValue } from '../utils/values';
+import type { CommentViewModel, CreateModel, RecordReference, TypeOption, TypeValue } from '../types/commentLogTypes';
+import { nonEmptyString } from '../utils/values';
 import '../styles/commentLog.css';
 
 export interface ICommentLogProps {
@@ -15,11 +15,11 @@ export interface ICommentLogProps {
   canRead: boolean;
   canCreate: boolean;
   usesTitleColumn: boolean;
-  usesTypeChoiceColumn: boolean;
-  typeOptions: TypeOption[];
+  usesTypeColumn: boolean;
   pickerTypeOptions: TypeOption[];
   isTypePickerLoading: boolean;
-  typeOnCreateValue?: number;
+  typeOnCreateValue?: TypeValue;
+  isTypeReady: boolean;
   showTypePickerOnCreate: boolean;
   selectedIds: string[];
   onToggleSelected: (id: string, selected: boolean) => void;
@@ -43,26 +43,26 @@ export const CommentLogControl: React.FC<ICommentLogProps> = props => {
   const [busy, setBusy] = React.useState(false);
   const [createTitle, setCreateTitle] = React.useState('');
   const [createBody, setCreateBody] = React.useState('');
-  const [createType, setCreateType] = React.useState<number | undefined>(props.typeOnCreateValue);
+  const [createType, setCreateType] = React.useState<TypeValue | undefined>();
   const mounted = React.useRef(true);
   const submitting = React.useRef(false);
-  const hasTypePicker = props.usesTypeChoiceColumn && props.showTypePickerOnCreate;
+  const hasTypePicker = props.usesTypeColumn && props.showTypePickerOnCreate;
 
   React.useEffect(() => {
     mounted.current = true;
     return () => { mounted.current = false; };
   }, []);
   React.useEffect(() => {
-    if (props.typeOnCreateValue !== undefined) setCreateType(props.typeOnCreateValue);
-    else if (!hasTypePicker) setCreateType(undefined);
-  }, [hasTypePicker, props.typeOnCreateValue]);
+    if (!hasTypePicker) setCreateType(undefined);
+  }, [hasTypePicker]);
 
   const selectedSet = React.useMemo(() => new Set(props.selectedIds), [props.selectedIds]);
   const records = props.comments.records;
   const inf = props.infinite;
   const sel = props.selection;
   const selectedType = props.pickerTypeOptions.find(option => option.value === createType);
-  const createDisabled = props.disabled || busy || !props.canCreate ||
+  const typeDisplayValue = selectedType?.label ?? (props.isTypePickerLoading ? 'Loading types…' : '---');
+  const createDisabled = props.disabled || busy || !props.canCreate || !props.isTypeReady ||
     (props.usesTitleColumn && !nonEmptyString(createTitle)) ||
     (hasTypePicker && !selectedType) || !nonEmptyString(createBody);
 
@@ -74,7 +74,7 @@ export const CommentLogControl: React.FC<ICommentLogProps> = props => {
       const posted = await props.onCreate({
         body: createBody,
         title: props.usesTitleColumn ? createTitle.trim() : undefined,
-        typeValue: props.usesTypeChoiceColumn ? props.typeOnCreateValue ?? createType : undefined,
+        typeValue: props.usesTypeColumn ? props.typeOnCreateValue ?? createType : undefined,
       });
       if (posted && mounted.current) {
         setCreateBody('');
@@ -113,15 +113,18 @@ export const CommentLogControl: React.FC<ICommentLogProps> = props => {
                       <div className="dv-control">
                         <Dropdown className="type-create-dropdown dv-dropdown" appearance="filled-lighter"
                           selectedOptions={selectedType ? [String(selectedType.value)] : []}
-                          value={selectedType?.label ?? (props.isTypePickerLoading ? 'Loading types…' : '---')}
+                          value={typeDisplayValue}
+                          button={{ children: <span className="type-selected-label" title={selectedType?.label}>{typeDisplayValue}</span> }}
+                          positioning={{ matchTargetSize: 'width' }}
+                          listbox={{ className: 'type-options-listbox' }}
                           placeholder="---" inlinePopup
-                          onOptionSelect={(_event, data) => setCreateType(optionValue(data.optionValue))}
+                          onOptionSelect={(_event, data) => setCreateType(props.pickerTypeOptions.find(option => String(option.value) === data.optionValue)?.value)}
                           disabled={props.disabled || busy || props.isTypePickerLoading}>
                           {props.pickerTypeOptions.map(option => (
                             <Option key={option.value} value={String(option.value)} text={option.label}>
-                              <span className="type-option-row" aria-hidden="true">
-                                <span className="type-option-swatch" style={{ backgroundColor: option.color ?? '#f3f2f1' }} />
-                                <span className="type-option-label">{option.label}</span>
+                              <span className="type-option-row">
+                                {option.color ? <span className="type-option-swatch" style={{ backgroundColor: option.color }} aria-hidden="true" /> : null}
+                                <span className="type-option-label" title={option.label}>{option.label}</span>
                               </span>
                             </Option>
                           ))}

@@ -8,6 +8,7 @@ export interface DatasetSnapshot<T> {
   firstPage: number;
   lastPage: number;
   error?: string;
+  dataUpdated?: boolean;
 }
 
 interface PageRequest {
@@ -74,7 +75,7 @@ export class DatasetState<T extends { id: string }> {
       return;
     }
 
-    if (queryChanged || signature !== this.signature || this.sawLoading) {
+    if (queryChanged || signature !== this.signature || this.sawLoading || snapshot.dataUpdated) {
       this.byId.clear();
       this.order = [];
       this.generation += queryChanged ? 0 : 1;

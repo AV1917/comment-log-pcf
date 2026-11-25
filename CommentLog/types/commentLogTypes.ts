@@ -4,11 +4,13 @@ export interface RecordReference {
   name?: string;
 }
 
+export type TypeValue = number | string;
+
 export interface CommentRecord {
   id: string;
   title?: string;
   body: string;
-  typeValue?: number;
+  typeValue?: TypeValue;
   typeLabel?: string;
   author?: RecordReference;
   authorText?: string;
@@ -29,17 +31,21 @@ export interface CommentViewModel {
 }
 
 export interface TypeOption {
-  value: number;
+  value: TypeValue;
   label: string;
   color?: string;
-  isHidden?: boolean;
-  state?: number;
+  selectable: boolean;
+}
+
+export interface TypeCatalogue {
+  lookupTarget?: string;
+  options: TypeOption[];
 }
 
 export interface CreateModel {
   title?: string;
   body: string;
-  typeValue?: number;
+  typeValue?: TypeValue;
 }
 
 export interface Notice {

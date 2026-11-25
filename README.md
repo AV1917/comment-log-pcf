@@ -31,7 +31,9 @@ It can also be useful simply to keep different kinds of information separate. Fo
 
 Comment Log can use the same Dataverse table across multiple instances, with each subgrid configured to display a different set of comments. For example, a record might have separate logs for general notes, decisions, and status updates, without requiring a dedicated table for each.
 
-Comment categorisation is optional, enabled by mapping the **Comment Type** parameter to a Choice or Status Reason column. Users can select a type when creating a comment, or the **Apply Type on Create** parameter can automatically assign a predefined value. This allows each log to display only the relevant comments while assigning the appropriate type to new ones. Alternatively, a single log can display all categories together and allow users to select the type themselves.
+Comment categorisation is optional, enabled by mapping the **Comment Type** parameter to a Choice, Status Reason, or Lookup column. Users can select a type when creating a comment, or the **Apply Type on Create** parameter can automatically assign a predefined value. This allows each log to display only the relevant comments while assigning the appropriate type to new ones. Alternatively, a single log can display all categories together and allow users to select the type themselves.
+
+Lookup-based types allow users with the appropriate permissions to manage comment categories without modifying a Choice or publishing customisations. The **Type View (Lookup Only)** parameter determines which types are available for selection and their display order using a Dataverse view, while the **Type Colour (Lookup Only)** parameter allows optional colour coding using a column on the lookup's target table.
 
 Comment types can also be used to drive additional behaviour through Dataverse plugins. For example, a PreValidation plugin registered on Create can use the assigned type to determine the record's owner, Business Unit, or other field values. This allows comments created through different instances of the Comment Log to follow different security or processing rules while sharing the same underlying table.
 
@@ -77,20 +79,6 @@ In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
   </thead>
   <tbody>
     <tr>
-      <td><strong>Comment Body</strong></td>
-      <td>—</td>
-      <td>Yes</td>
-      <td>Multiple lines of plain text.</td>
-      <td>Displays the body with line breaks preserved.</td>
-    </tr>
-    <tr>
-      <td><strong>Date</strong></td>
-      <td>—</td>
-      <td>Yes</td>
-      <td><strong>Created On</strong> or a custom Date and Time or Date Only column.</td>
-      <td>Displays the formatted date, or <em>Unknown Date</em> when blank. Populated with the current date and time on creation of a new comment.</td>
-    </tr>
-    <tr>
       <td><strong>Comment Title</strong></td>
       <td>—</td>
       <td>No</td>
@@ -98,14 +86,25 @@ In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
       <td>Map to the table's primary name column to display existing titles and require users to enter one when posting. Otherwise, leave unmapped, but ensure the primary name is either optional or populated automatically by a synchronous workflow or plugin, as it is required by default.</td>
     </tr>
     <tr>
+      <td><strong>Comment Body</strong></td>
+      <td>—</td>
+      <td>Yes</td>
+      <td>Multiple lines of plain text.</td>
+      <td>Displays the body with line breaks preserved.</td>
+    </tr>
+    <tr>
       <td><strong>Comment Type</strong></td>
       <td>—</td>
       <td>No</td>
-      <td>Single-select local or global Choice or <strong>Status Reason</strong> (<code>statuscode</code>).</td>
+      <td>Single-select local or global Choice, <strong>Status Reason</strong> (<code>statuscode</code>), or single-table Lookup.</td>
       <td rowspan="2" valign="top">
-        <p>Displays the choice field's label and colour, falling back to <strong>Type Placeholder</strong> when no label is available or when <strong>Comment Type</strong> is unmapped.</p>
-        <p>Mapping <strong>Comment Type</strong> adds a required type picker unless <strong>Apply Type on Create</strong> supplies a fixed numeric value.</p>
-        <p>The picker excludes options with <code>IsHidden = true</code> and, for Status Reason, reasons associated with inactive states.</p>
+        <p>Displays the Choice label or Lookup record's primary name, falling back to <strong>Type Placeholder</strong> when no label is available or when <strong>Comment Type</strong> is unmapped.</p>
+        <p>Mapping <strong>Comment Type</strong> adds a required type picker unless <strong>Apply Type on Create</strong> supplies a fixed option value or record GUID.</p>
+        <p>For Choice and Status Reason, the picker excludes options with Inactive states or where <code>IsHidden = true</code>. The Lookup picker follows <strong>Type View</strong>; types excluded from the view remain displayable on existing comments and can be assigned through <strong>Apply Type on Create</strong>.</p>
+        <p>When using Lookup-based comment types, users also need Read and Append To access to the type records to create comments.</p>
+        <h4>Colour coding</h4>
+        <p>For Choices, types use their option colours, with grey used for any missing colours. If none of the options have a colour, types appear as plain text without space reserved for colour indicators.</p>
+        <p>For Lookups, map a colour column to colour code types using its values. Blank or invalid values use grey, even if none of the records have a valid colour. Leave the column unmapped to display types as plain text without space reserved for colour indicators.</p>
       </td>
     </tr>
     <tr>
@@ -138,6 +137,13 @@ In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
       <td>Text setting.</td>
     </tr>
     <tr>
+      <td><strong>Comment Date</strong></td>
+      <td>—</td>
+      <td>Yes</td>
+      <td><strong>Created On</strong> or a custom Date and Time or Date Only column.</td>
+      <td>Displays the formatted date, or <em>Unknown Date</em> when blank. Populated with the current date and time on creation of a new comment.</td>
+    </tr>
+    <tr>
       <td><strong>Related Record</strong></td>
       <td>—</td>
       <td>No</td>
@@ -152,11 +158,13 @@ In the classic form editor, use **Subgrid Properties > Controls > Add Control**.
 | Setting | Default | Configuration and behaviour |
 | --- | --- | --- |
 | **Page Size** | `20` | Enter a positive whole number. Sets how many comments are requested initially and with each *Show more* batch. |
-| **Apply Type on Create** | Blank | This feature requires a **Comment Type** mapping to use. Leave it blank for users to choose their own type, or enter an option's numeric value to assign it automatically and hide the type picker. |
+| **Apply Type on Create** | Blank | This feature requires a **Comment Type** mapping to use. Leave it blank for users to choose their own type, or enter an option's numeric value (Choice or Status Reason) or a record GUID (Lookup) to assign it automatically and hide the type picker. A fixed Lookup GUID can identify any record on the lookup target table, whether or not it appears in **Type View**. No view is required or loaded for fixed Lookup types. Dataverse still enforces record existence, access, and validation. |
+| **Type Colour (Lookup Only)** | Blank | Colour codes Lookup types on comment cards and in the type picker. Enter the logical name of a text column on the lookup target table containing six-digit hexadecimal colours, with or without `#` (e.g. `#E02D35` or `e02d35`). Blank or invalid values use grey. Leave unmapped to disable colour coding and let type names use the space otherwise reserved for colour indicators. |
+| **Type View (Lookup Only)** | Blank | Optional GUID of an active system view on the lookup target table. When **Apply Type on Create** is not in use, this parameter controls the selectable options and sort order in the Type picker. Leave blank to use the table's default Lookup View. |
 | **Override Inactive?** | No | Set to **Yes** to allow new comment creation after the parent record is closed or inactive. |
 | **Lock if No Parent Write?** | Yes | Set to **No** to allow new comment creation when users can access the parent record but cannot edit it. They will still need Create and Append on the comments table, and Append To on the parent. |
 
-![Example Configuration II](https://github.com/user-attachments/assets/8349969b-a89f-4ead-ab61-fd5bc41cc335)
+![Example Configuration II](https://github.com/user-attachments/assets/51b80575-00ef-4e93-9e56-e1d231ac892a)
 
 ## Usage notes
 
@@ -171,3 +179,5 @@ After a successful post, the draft is cleared, the comment list refreshes to inc
 Existing comments can be opened from their cards to access the underlying Dataverse record.
 
 The comment editor can be expanded while composing longer comments.
+
+Make sure to configure the Comment Log subgrid's view with the columns and column order you want to use when exporting comments to Excel.

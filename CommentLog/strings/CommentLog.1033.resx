@@ -125,10 +125,22 @@
     <value>Comment Title</value>
   </data>
   <data name="CommentType_Desc" xml:space="preserve">
-    <value>Optional choice column to categorise and colour-code Comments.</value>
+    <value>Optional Choice, Status Reason, or Lookup column to categorise and colour code Comments.</value>
   </data>
   <data name="CommentType_Disp" xml:space="preserve">
     <value>Comment Type</value>
+  </data>
+  <data name="LockIfNoParentWrite_Desc" xml:space="preserve">
+    <value>Lock this PCF when the current user has no Write access to the host record. Other security permissions still apply.</value>
+  </data>
+  <data name="LockIfNoParentWrite_Disp" xml:space="preserve">
+    <value>Lock if No Parent Write?</value>
+  </data>
+  <data name="OverrideInactive_Desc" xml:space="preserve">
+    <value>Leave this PCF active and unlocked when the host record is inactive. Other security permissions still apply.</value>
+  </data>
+  <data name="OverrideInactive_Disp" xml:space="preserve">
+    <value>Override Inactive?</value>
   </data>
   <data name="PageSize_Desc" xml:space="preserve">
     <value>Number of records to load per page.</value>
@@ -142,10 +154,22 @@
   <data name="RelatedRecord_Disp" xml:space="preserve">
     <value>Related Record</value>
   </data>
-  <data name="TypeOnCreate_Desc" xml:space="preserve">
-    <value>Only use this parameter when 'Comment Type' is also in use! Set this value to a numeric choice value to auto-apply a designated Type on creation of a new Comment. Alternatively, leave this parameter blank to allow the user to select a Type of their choice.</value>
+  <data name="TypeColour_Desc" xml:space="preserve">
+    <value>Only used when 'Comment Type' is a Lookup! Optional logical name of a text column on the lookup target table containing a six-digit hexadecimal colour, used to colour code types on comment cards and in the type picker. Leave unmapped to disable colour coding and let type names use the space otherwise reserved for colour indicators.</value>
   </data>
-  <data name="TypeOnCreate_Disp" xml:space="preserve">
+  <data name="TypeColour_Disp" xml:space="preserve">
+    <value>Type Colour (Lookup Only)</value>
+  </data>
+  <data name="TypeView_Desc" xml:space="preserve">
+    <value>Only used when 'Comment Type' is a Lookup, and where 'Apply Type on Create' is not in use! Optional system view GUID from the lookup target table, controlling which types can be selected and their order. Leave blank to use the table's default Lookup View.</value>
+  </data>
+  <data name="TypeView_Disp" xml:space="preserve">
+    <value>Type View (Lookup Only)</value>
+  </data>
+  <data name="TypeOnCreate_Desc" xml:space="preserve">
+    <value>Only use this parameter when 'Comment Type' is also in use! Set this value to a numeric choice value if 'Comment Type' is a choice, or a record GUID from the lookup target table if 'Comment Type' is a lookup, to auto-apply a designated Type on creation of a new Comment. Alternatively, leave this parameter blank to allow the user to select a Type of their choice.</value>
+    </data>
+    <data name="TypeOnCreate_Disp" xml:space="preserve">
     <value>Apply Type on Create</value>
   </data>
   <data name="TypePlaceholder_Desc" xml:space="preserve">
@@ -164,6 +188,6 @@
     <value>Date or datetime column used for the Comment's upload date.</value>
   </data>
   <data name="UploadDate_Disp" xml:space="preserve">
-    <value>Date</value>
+    <value>Comment Date</value>
   </data>
 </root>
